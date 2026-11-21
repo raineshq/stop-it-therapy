@@ -160,12 +160,12 @@ function getHTML() {
         Tell us
       </div>
       <div class="step">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a1 1 0 0 1 1-1 1 1 0 0 1 1 1v4"/><path d="M15 10h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/></svg>
-        Stop it
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Session
       </div>
       <div class="step">
         <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg>
-        Blinds close
+        Done
       </div>
     </div>
     <p class="tagline">So what’s the problem you’re having?</p>
