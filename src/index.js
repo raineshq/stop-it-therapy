@@ -85,11 +85,6 @@ function getHTML() {
       margin: 1rem 0;
       letter-spacing: -1px;
     }
-    .free {
-      font-size: 1.3rem;
-      margin-top: 1rem;
-      color: #0a0;
-    }
     .blinds {
       position: absolute;
       top: 0;
@@ -101,6 +96,30 @@ function getHTML() {
       z-index: 10;
     }
     .blinds.closed { height: 100%; }
+    .donation {
+      margin-top: 2rem;
+      max-width: 500px;
+      text-align: center;
+      display: none;
+    }
+    .donation h2 {
+      font-size: 1.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .donation p {
+      color: #555;
+      margin-bottom: 1rem;
+    }
+    .donate-btn {
+      background: #0a0;
+      color: white;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .donate-btn:hover { background: #080; }
     .disclaimer {
       margin-top: 3rem;
       font-size: 0.85rem;
@@ -122,13 +141,18 @@ function getHTML() {
     </form>
     <div class="result" id="result">
       <div class="stop-it">Stop it!</div>
-      <p class="free">No charge. Just stop it.</p>
     </div>
+  </div>
+
+  <div class="donation" id="donation">
+    <h2>If that helped…</h2>
+    <p>A $5 donation keeps the blinds closing for the next person.</p>
+    <button class="donate-btn" onclick="alert('Donation link coming soon. Venmo or Stripe next.')">Donate $5</button>
   </div>
 
   <p class="disclaimer">
     This is not real therapy. Inspired by the classic Bob Newhart Mad TV sketch. 
-    Completely free. Results not guaranteed. Blinds close for a reason.
+    Completely free. Donations optional. Results not guaranteed. Blinds close for a reason.
   </p>
 
   <audio id="slap" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11e0b0e0e0.mp3" preload="auto"></audio>
@@ -147,10 +171,15 @@ function getHTML() {
       const slap = document.getElementById('slap');
       slap.play().catch(() => {});
 
-      // Close blinds after a moment
+      // Show donation ask after a short beat
+      setTimeout(() => {
+        document.getElementById('donation').style.display = 'block';
+      }, 1200);
+
+      // Close blinds a little later so they can see the ask
       setTimeout(() => {
         document.getElementById('blinds').classList.add('closed');
-      }, 800);
+      }, 2200);
     });
   </script>
 </body>

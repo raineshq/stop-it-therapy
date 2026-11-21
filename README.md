@@ -4,6 +4,8 @@ A Cloudflare Worker for the ultimate brief therapy experience.
 
 Free therapy. So what’s the problem you’re having? Stop it.
 
+If it helped, a $5 donation is appreciated (optional).
+
 ## Deploy
 
 ```bash
