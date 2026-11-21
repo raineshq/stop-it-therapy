@@ -1,5 +1,5 @@
 # Free Therapy Now
 
-> A free, Bob Newhart–inspired “Stop It!” comedy parody. The site does not provide therapy or mental health services.
+> A free, original comedy experience. The site does not provide therapy or mental health services.
 
 - [Free Therapy Now](https://freetherapynow.com/): Visitors can type a problem and get the punchline “Stop it!” The site does not transmit or save problem text. An optional $5 payment supports the site.
