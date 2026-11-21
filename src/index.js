@@ -1,9 +1,9 @@
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env = {}) {
     const url = new URL(request.url);
     
     if (url.pathname === '/') {
-      return new Response(getHTML(), {
+      return new Response(getHTML(env.DONATION_URL), {
         headers: { 'Content-Type': 'text/html;charset=UTF-8' },
       });
     }
@@ -12,7 +12,16 @@ export default {
   },
 };
 
-function getHTML() {
+function getHTML(donationUrl) {
+  let giveButton = '<button class="donate-btn" disabled>Give Now</button>';
+  if (donationUrl) {
+    const url = URL.canParse(donationUrl) ? new URL(donationUrl) : null;
+    if (url?.protocol === 'https:') {
+      const href = url.href.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+      giveButton = `<a class="donate-btn" href="${href}">Give Now</a>`;
+    }
+  }
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,6 +82,7 @@ function getHTML() {
     }
     .step svg { width: 28px; height: 28px; }
     .tagline {
+      display: block;
       font-size: 1.15rem;
       color: #444;
       margin-bottom: 1.5rem;
@@ -89,7 +99,7 @@ function getHTML() {
       font-family: inherit;
     }
     textarea:focus { outline: none; border-color: #111; }
-    button {
+    button, .donate-btn {
       background: #111;
       color: white;
       border: none;
@@ -100,37 +110,25 @@ function getHTML() {
       width: 100%;
       font-weight: 600;
     }
-    button:hover { background: #222; }
-    .result { display: none; margin-top: 1.5rem; }
+    button:hover:not(:disabled), a.donate-btn:hover { background: #222; }
+    [hidden] { display: none !important; }
     .stop-it {
-      font-size: 3.2rem;
+      font-size: clamp(2.5rem, 10vw, 3.2rem);
       font-weight: 900;
-      color: #c00;
       letter-spacing: -1px;
     }
-    .blinds {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 0;
-      background: #111;
-      transition: height 1.1s ease-in;
-      z-index: 20;
-    }
-    .blinds.closed { height: 100%; }
     .donation {
-      margin-top: 2rem;
-      max-width: 480px;
-      text-align: center;
-      display: none;
+      font-size: 0.875rem;
+      color: #555;
+      margin: 0.75rem 0 1rem;
     }
-    .donation h2 { font-size: 1.3rem; margin-bottom: 0.4rem; }
-    .donation p { color: #555; margin-bottom: 1rem; }
     .donate-btn {
-      background: #0a0;
+      display: inline-block;
       width: auto;
-      padding: 0.85rem 1.6rem;
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
     }
-    .donate-btn:hover { background: #080; }
+    .donate-btn:disabled { opacity: 0.55; cursor: default; }
     .disclaimer {
       margin-top: 2.5rem;
       font-size: 0.8rem;
@@ -139,7 +137,6 @@ function getHTML() {
       text-align: center;
       line-height: 1.5;
     }
-    audio { display: none; }
   </style>
 </head>
 <body>
@@ -153,35 +150,32 @@ function getHTML() {
   </div>
 
   <div class="container" id="session">
-    <div class="blinds" id="blinds"></div>
-    <div class="steps">
-      <div class="step">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Tell us
+    <div id="prompt">
+      <div class="steps">
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Tell us
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Session
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg>
+          Done
+        </div>
       </div>
-      <div class="step">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Session
-      </div>
-      <div class="step">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg>
-        Done
-      </div>
+      <label class="tagline" for="problem">So what’s the problem you’re having?</label>
+      <form id="form">
+        <textarea id="problem" placeholder="Tell me about it..." required></textarea>
+        <button type="submit">Begin Free Session</button>
+      </form>
     </div>
-    <p class="tagline">So what’s the problem you’re having?</p>
-    <form id="form">
-      <textarea id="problem" placeholder="Tell me about it..." required></textarea>
-      <button type="submit">Begin Free Session</button>
-    </form>
-    <div class="result" id="result">
-      <div class="stop-it">Stop it!</div>
+    <div id="result" hidden>
+      <h2 class="stop-it" tabindex="-1">Stop it!</h2>
+      <p class="donation">If this session has been helpful, please give $5.</p>
+      ${giveButton}
     </div>
-  </div>
-
-  <div class="donation" id="donation">
-    <h2>If that helped…</h2>
-    <p>A $5 donation keeps the blinds closing for the next person.</p>
-    <button class="donate-btn" onclick="alert('Donation link coming soon.')">Donate $5</button>
   </div>
 
   <p class="disclaimer">
@@ -190,28 +184,24 @@ function getHTML() {
     Completely free. Donations optional. Results not guaranteed.
   </p>
 
-  <audio id="slap" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11e0b0e0e0.mp3" preload="auto"></audio>
-
   <script>
-    document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const problem = document.getElementById('problem').value;
-      if (!problem.trim()) return;
+    const form = document.getElementById('form');
+    const problem = document.getElementById('problem');
+    const result = document.getElementById('result');
 
-      document.getElementById('form').style.display = 'none';
-      document.querySelector('.tagline').style.display = 'none';
-      document.querySelector('.steps').style.display = 'none';
-      document.getElementById('result').style.display = 'block';
+    problem.addEventListener('input', () => problem.setCustomValidity(''));
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!problem.value.trim()) {
+        problem.setCustomValidity('Tell me about it first.');
+        problem.reportValidity();
+        return;
+      }
 
-      document.getElementById('slap').play().catch(() => {});
-
-      setTimeout(() => {
-        document.getElementById('donation').style.display = 'block';
-      }, 1000);
-
-      setTimeout(() => {
-        document.getElementById('blinds').classList.add('closed');
-      }, 2000);
+      form.reset();
+      document.getElementById('prompt').hidden = true;
+      result.hidden = false;
+      result.querySelector('h2').focus();
     });
   </script>
 </body>
