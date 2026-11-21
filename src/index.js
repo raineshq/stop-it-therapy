@@ -129,6 +129,14 @@ function getHTML(donationUrl) {
       text-decoration: none;
     }
     .donate-btn:disabled { opacity: 0.55; cursor: default; }
+    footer {
+      max-width: 480px;
+      margin-top: 1.5rem;
+      color: #555;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -169,6 +177,8 @@ function getHTML(donationUrl) {
       ${giveButton}
     </div>
   </div>
+
+  <footer>The problem you enter is anonymous and no information will be saved by this website.</footer>
 
   <script>
     const form = document.getElementById('form');
