@@ -18,7 +18,7 @@ function getHTML() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stop It! Instant Therapy</title>
+  <title>Stop It! Free Instant Therapy</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -85,9 +85,10 @@ function getHTML() {
       margin: 1rem 0;
       letter-spacing: -1px;
     }
-    .price {
+    .free {
       font-size: 1.3rem;
       margin-top: 1rem;
+      color: #0a0;
     }
     .blinds {
       position: absolute;
@@ -114,20 +115,20 @@ function getHTML() {
   <div class="container" id="session">
     <div class="blinds" id="blinds"></div>
     <h1>Stop It!</h1>
-    <p class="tagline">So what’s the problem you’re having?</p>
+    <p class="tagline">Free therapy. So what’s the problem you’re having?</p>
     <form id="form">
       <textarea id="problem" placeholder="Tell me about it..." required></textarea>
-      <button type="submit">Begin Session</button>
+      <button type="submit">Begin Free Session</button>
     </form>
     <div class="result" id="result">
       <div class="stop-it">Stop it!</div>
-      <p class="price">That will be $5.</p>
+      <p class="free">No charge. Just stop it.</p>
     </div>
   </div>
 
   <p class="disclaimer">
     This is not real therapy. Inspired by the classic Bob Newhart Mad TV sketch. 
-    Results not guaranteed. Blinds close for a reason.
+    Completely free. Results not guaranteed. Blinds close for a reason.
   </p>
 
   <audio id="slap" src="https://cdn.pixabay.com/audio/2022/03/15/audio_11e0b0e0e0.mp3" preload="auto"></audio>

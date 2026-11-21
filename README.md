@@ -1,8 +1,8 @@
-# Stop It! Instant Therapy
+# Stop It! Free Instant Therapy
 
 A Cloudflare Worker for the ultimate brief therapy experience.
 
-So what’s the problem you’re having? Stop it. $5.
+Free therapy. So what’s the problem you’re having? Stop it.
 
 ## Deploy
 
