@@ -18,7 +18,7 @@ function getHTML() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stop It! Free Instant Therapy</title>
+  <title>Free Therapy Now</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -133,8 +133,8 @@ function getHTML() {
 <body>
   <div class="container" id="session">
     <div class="blinds" id="blinds"></div>
-    <h1>Stop It!</h1>
-    <p class="tagline">Free therapy. So what’s the problem you’re having?</p>
+    <h1>Free Therapy Now</h1>
+    <p class="tagline">So what’s the problem you’re having?</p>
     <form id="form">
       <textarea id="problem" placeholder="Tell me about it..." required></textarea>
       <button type="submit">Begin Free Session</button>
@@ -151,6 +151,7 @@ function getHTML() {
   </div>
 
   <p class="disclaimer">
+    freetherapynow.com<br>
     This is not real therapy. Inspired by the classic Bob Newhart Mad TV sketch. 
     Completely free. Donations optional. Results not guaranteed. Blinds close for a reason.
   </p>
