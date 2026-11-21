@@ -78,7 +78,7 @@ function getHTML(showResult, donationUrl) {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f7f7f7;
+      background: #f4ebd6;
       color: #111;
       min-height: 100vh;
       display: flex;
@@ -88,40 +88,63 @@ function getHTML(showResult, donationUrl) {
       padding: 2rem 1rem;
     }
     .logo {
+      width: min(100%, 520px);
       text-align: center;
-      margin-bottom: 2rem;
     }
     .logo svg {
-      width: 72px;
-      height: 72px;
+      display: block;
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 0.75rem;
     }
     .site-description {
-      margin-top: 0.5rem;
-      color: #555;
-      font-size: 0.875rem;
+      max-width: 34ch;
+      margin: 0.85rem auto 1.15rem;
+      color: #514339;
+      font-size: 0.9375rem;
+      line-height: 1.5;
     }
     .logo h1 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-top: 0.5rem;
+      padding: 0.8rem 0.4rem;
+      border: 3px solid #33251b;
+      border-radius: 4px 4px 2px 2px;
+      background: #f2c96b;
+      box-shadow: inset 0 0 0 3px #f9dda1, 0 4px 0 #33251b;
+      font-size: clamp(1.45rem, 6vw, 2.25rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
     }
     .container {
-      max-width: 480px;
-      width: 100%;
-      background: white;
-      padding: 2.5rem 2rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      width: min(100%, 488px);
+      padding: 1.85rem clamp(0.85rem, 5vw, 2.25rem) 2rem;
+      border: solid #33251b;
+      border-width: 3px clamp(7px, 2vw, 12px) 0;
+      border-radius: 3px 3px 0 0;
+      background: #fffaf0;
       text-align: center;
-      position: relative;
-      overflow: hidden;
+    }
+    .counter {
+      width: min(100%, 520px);
+      height: 18px;
+      border: 3px solid #33251b;
+      border-radius: 3px;
+      background: #8b3326;
+      box-shadow: inset 0 3px 0 #ac5441, 0 5px 0 #33251b;
+    }
+    .booth-base {
+      width: min(calc(100% - 16px), 480px);
+      height: clamp(26px, 6vw, 45px);
+      border: solid #33251b;
+      border-width: 0 3px 3px;
+      border-radius: 0 0 3px 3px;
+      background: repeating-linear-gradient(90deg, #b87448 0 47px, #8e5133 47px 50px);
     }
     .steps {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       font-size: 0.85rem;
       color: #666;
     }
@@ -142,7 +165,8 @@ function getHTML(showResult, donationUrl) {
       width: 100%;
       height: 110px;
       padding: 1rem;
-      border: 1.5px solid #e0e0e0;
+      border: 1.5px solid #947b66;
+      background: #fffdf8;
       border-radius: 10px;
       font-size: 1rem;
       resize: vertical;
@@ -151,7 +175,7 @@ function getHTML(showResult, donationUrl) {
     }
     textarea:focus { outline: none; border-color: #111; }
     button, .donate-btn {
-      background: #111;
+      background: #202a23;
       color: white;
       border: none;
       padding: 1rem 2rem;
@@ -161,7 +185,8 @@ function getHTML(showResult, donationUrl) {
       width: 100%;
       font-weight: 600;
     }
-    button:hover:not(:disabled), a.donate-btn:hover { background: #222; }
+    button:hover:not(:disabled), a.donate-btn:hover { background: #354138; }
+    body.result-page .logo { margin-bottom: 1.15rem; }
     .stop-it {
       font-size: clamp(5rem, 20vw, 6.4rem);
       font-weight: 900;
@@ -179,17 +204,9 @@ function getHTML(showResult, donationUrl) {
       text-decoration: none;
     }
     .donate-btn:disabled { opacity: 0.55; cursor: default; }
-    footer {
-      max-width: 480px;
-      margin-top: 1.5rem;
-      color: #555;
-      font-size: 0.875rem;
-      line-height: 1.5;
-      text-align: center;
-    }
   </style>
 </head>
-<body>
+<body class="${showResult ? 'result-page' : ''}">
   <div class="logo">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="48" fill="#111"/>
@@ -197,14 +214,14 @@ function getHTML(showResult, donationUrl) {
       <path d="M62 38c2 0 4 1.5 4 4v8c0 1-1 2-2 2h-4V38h2z" fill="white"/>
     </svg>
     <h1>FREE THERAPY NOW</h1>
-    ${showResult ? '' : '<p class="site-description">Enter a problem anonymously and get a brief response.</p>'}
+    ${showResult ? '' : '<p class="site-description">Everything you enter here is anonymous and no information will be saved by this website.</p>'}
   </div>
 
-  <div class="container" id="session">
+  <main class="container" id="session">
     ${showResult ? result : prompt}
-  </div>
-
-  <footer>The problem you enter is anonymous and no information will be saved by this website.</footer>
+  </main>
+  <div class="counter" aria-hidden="true"></div>
+  <div class="booth-base" aria-hidden="true"></div>
 
   ${showResult ? '' : `<script>
     const form = document.getElementById('form');
