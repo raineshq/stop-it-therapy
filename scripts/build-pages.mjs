@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import worker from '../src/index.js';
 
 for (const path of ['/', '/session/']) {
@@ -8,4 +8,8 @@ for (const path of ['/', '/session/']) {
   const directory = `dist${path}`;
   await mkdir(directory, { recursive: true });
   await writeFile(`${directory}index.html`, await response.text());
+}
+
+for (const file of ['robots.txt', 'sitemap.xml', 'llms.txt']) {
+  await copyFile(new URL(`../public/${file}`, import.meta.url), `dist/${file}`);
 }
