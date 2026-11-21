@@ -3,7 +3,7 @@ export default {
     const url = new URL(request.url);
     
     if (url.pathname === '/') {
-      return new Response(getHTML(env.DONATION_URL), {
+      return new Response(getHTML(env.DONATION_URL || 'https://buy.stripe.com/bJe28k6Shdbb3mS83Xbwk05'), {
         headers: { 'Content-Type': 'text/html;charset=UTF-8' },
       });
     }
