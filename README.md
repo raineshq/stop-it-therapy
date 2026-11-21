@@ -1,8 +1,8 @@
-# Stop It! Free Instant Therapy
+# Free Therapy Now
 
-A Cloudflare Worker for the ultimate brief therapy experience.
+freetherapynow.com
 
-Free therapy. So what’s the problem you’re having? Stop it.
+Free instant therapy. So what’s the problem you’re having? Stop it.
 
 If it helped, a $5 donation is appreciated (optional).
 
@@ -12,5 +12,10 @@ If it helped, a $5 donation is appreciated (optional).
 npm install
 npm run deploy
 ```
+
+Then in the Cloudflare dashboard:
+1. Go to the freetherapynow Worker
+2. Settings → Domains & Routes
+3. Add custom domain: freetherapynow.com
 
 Requires a Cloudflare account and Wrangler authenticated.
