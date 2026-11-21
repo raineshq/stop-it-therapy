@@ -57,21 +57,21 @@ function getHTML(showResult, donationUrl) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${showResult ? 'Stop it! | Free Therapy Now' : 'Free Therapy Now | Original Comedy Experience'}</title>
+  <title>${showResult ? 'Stop it! | Free Therapy Now' : 'Free Therapy Now'}</title>
   ${showResult ? '<meta name="robots" content="noindex, follow">' : `
-  <meta name="description" content="Free Therapy Now is a free, original comedy experience. Type a problem anonymously for a quick comedy bit. It does not provide therapy or mental health services.">
+  <meta name="description" content="Enter a problem anonymously and get a brief response. Free Therapy Now does not provide therapy or mental health services.">
   <link rel="canonical" href="https://freetherapynow.com/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://freetherapynow.com/">
-  <meta property="og:title" content="Free Therapy Now | Original Comedy Experience">
-  <meta property="og:description" content="Free Therapy Now is a free, original comedy experience. Type a problem anonymously for a quick comedy bit. It does not provide therapy or mental health services.">
+  <meta property="og:title" content="Free Therapy Now">
+  <meta property="og:description" content="Enter a problem anonymously and get a brief response. Free Therapy Now does not provide therapy or mental health services.">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Free Therapy Now",
       "url": "https://freetherapynow.com/",
-      "description": "Free Therapy Now is a free, original comedy experience. Type a problem anonymously for a quick comedy bit. It does not provide therapy or mental health services."
+      "description": "Enter a problem anonymously and get a brief response. Free Therapy Now does not provide therapy or mental health services."
     }
   </script>`}
   <style>
@@ -197,7 +197,7 @@ function getHTML(showResult, donationUrl) {
       <path d="M62 38c2 0 4 1.5 4 4v8c0 1-1 2-2 2h-4V38h2z" fill="white"/>
     </svg>
     <h1>FREE THERAPY NOW</h1>
-    ${showResult ? '' : '<p class="site-description">An original comedy experience. Not a therapy service.</p>'}
+    ${showResult ? '' : '<p class="site-description">Enter a problem anonymously and get a brief response.</p>'}
   </div>
 
   <div class="container" id="session">
