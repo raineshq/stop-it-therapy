@@ -2,8 +2,9 @@ export default {
   async fetch(request, env = {}) {
     const url = new URL(request.url);
     
-    if (url.pathname === '/') {
-      return new Response(getHTML(env.DONATION_URL || 'https://buy.stripe.com/bJe28k6Shdbb3mS83Xbwk05'), {
+    const showResult = url.pathname === '/session/';
+    if (url.pathname === '/' || showResult) {
+      return new Response(getHTML(showResult, env.DONATION_URL || 'https://buy.stripe.com/bJe28k6Shdbb3mS83Xbwk05'), {
         headers: { 'Content-Type': 'text/html;charset=UTF-8' },
       });
     }
@@ -12,7 +13,7 @@ export default {
   },
 };
 
-function getHTML(donationUrl) {
+function getHTML(showResult, donationUrl) {
   let giveButton = '<button class="donate-btn" disabled>Give Now</button>';
   if (donationUrl) {
     const url = URL.canParse(donationUrl) ? new URL(donationUrl) : null;
@@ -22,12 +23,41 @@ function getHTML(donationUrl) {
     }
   }
 
+  const prompt = `
+    <div id="prompt">
+      <div class="steps">
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Tell us
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Session
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg>
+          Done
+        </div>
+      </div>
+      <label class="tagline" for="problem">So what’s the problem you’re having?</label>
+      <form id="form" action="/session/" method="get">
+        <textarea id="problem" autocomplete="off" placeholder="Tell me about it..." required></textarea>
+        <button type="submit">Begin Free Session</button>
+      </form>
+    </div>`;
+  const result = `
+    <div>
+      <h2 class="stop-it">Stop it!</h2>
+      <p class="donation">If this session has been helpful, please give $5.</p>
+      ${giveButton}
+    </div>`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Therapy Now</title>
+  <title>${showResult ? 'Stop it! | ' : ''}Free Therapy Now</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -111,9 +141,8 @@ function getHTML(donationUrl) {
       font-weight: 600;
     }
     button:hover:not(:disabled), a.donate-btn:hover { background: #222; }
-    [hidden] { display: none !important; }
     .stop-it {
-      font-size: clamp(2.5rem, 10vw, 3.2rem);
+      font-size: clamp(5rem, 20vw, 6.4rem);
       font-weight: 900;
       letter-spacing: -1px;
     }
@@ -150,56 +179,27 @@ function getHTML(donationUrl) {
   </div>
 
   <div class="container" id="session">
-    <div id="prompt">
-      <div class="steps">
-        <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          Tell us
-        </div>
-        <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Session
-        </div>
-        <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8h16M4 12h16M4 16h16"/></svg>
-          Done
-        </div>
-      </div>
-      <label class="tagline" for="problem">So what’s the problem you’re having?</label>
-      <form id="form">
-        <textarea id="problem" placeholder="Tell me about it..." required></textarea>
-        <button type="submit">Begin Free Session</button>
-      </form>
-    </div>
-    <div id="result" hidden>
-      <h2 class="stop-it" tabindex="-1">Stop it!</h2>
-      <p class="donation">If this session has been helpful, please give $5.</p>
-      ${giveButton}
-    </div>
+    ${showResult ? result : prompt}
   </div>
 
   <footer>The problem you enter is anonymous and no information will be saved by this website.</footer>
 
-  <script>
+  ${showResult ? '' : `<script>
     const form = document.getElementById('form');
     const problem = document.getElementById('problem');
-    const result = document.getElementById('result');
 
     problem.addEventListener('input', () => problem.setCustomValidity(''));
     form.addEventListener('submit', (event) => {
-      event.preventDefault();
       if (!problem.value.trim()) {
+        event.preventDefault();
         problem.setCustomValidity('Tell me about it first.');
         problem.reportValidity();
         return;
       }
 
       form.reset();
-      document.getElementById('prompt').hidden = true;
-      result.hidden = false;
-      result.querySelector('h2').focus();
     });
-  </script>
+  </script>`}
 </body>
 </html>`;
 }
