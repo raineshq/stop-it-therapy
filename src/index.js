@@ -129,14 +129,6 @@ function getHTML(donationUrl) {
       text-decoration: none;
     }
     .donate-btn:disabled { opacity: 0.55; cursor: default; }
-    .disclaimer {
-      margin-top: 2.5rem;
-      font-size: 0.8rem;
-      color: #888;
-      max-width: 480px;
-      text-align: center;
-      line-height: 1.5;
-    }
   </style>
 </head>
 <body>
@@ -177,12 +169,6 @@ function getHTML(donationUrl) {
       ${giveButton}
     </div>
   </div>
-
-  <p class="disclaimer">
-    freetherapynow.com<br>
-    This is not real therapy. Inspired by the Bob Newhart Mad TV sketch.<br>
-    Completely free. Donations optional. Results not guaranteed.
-  </p>
 
   <script>
     const form = document.getElementById('form');
