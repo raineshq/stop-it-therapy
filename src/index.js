@@ -42,6 +42,16 @@ function getHTML(showResult, donationUrl) {
       <label class="tagline" for="problem">So what’s the problem you’re having?</label>
       <form id="form" action="/session/" method="get">
         <textarea id="problem" autocomplete="off" placeholder="Tell me about it..." required></textarea>
+        <div class="voice-controls" id="voice-controls" hidden>
+          <button class="voice-button" id="voice-button" type="button" aria-pressed="false">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="9" y="2" width="6" height="13" rx="3"/>
+              <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3"/>
+            </svg>
+            <span>Use microphone</span>
+          </button>
+          <p id="voice-status" role="status"></p>
+        </div>
         <button type="submit">Begin Free Session</button>
       </form>
     </div>`;
@@ -50,7 +60,18 @@ function getHTML(showResult, donationUrl) {
       <h2 class="stop-it">Stop it!</h2>
       <p class="donation">If this session has been helpful, please give $5.</p>
       ${giveButton}
-    </div>`;
+    </div>
+    <section class="follow-up" aria-labelledby="follow-up-heading">
+      <h3 id="follow-up-heading">If you are unsatisfied with your therapy session today, we suggest watching the following video may provide further support.</h3>
+      <iframe
+        title="Further support video"
+        src="https://www.youtube-nocookie.com/embed/Ywc4q6qUvDk"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="encrypted-media; picture-in-picture"
+        allowfullscreen></iframe>
+      <a href="https://www.youtube.com/watch?v=Ywc4q6qUvDk">Watch on YouTube</a>
+    </section>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -187,6 +208,51 @@ function getHTML(showResult, donationUrl) {
     }
     button:hover:not(:disabled), a.donate-btn:hover { background: #354138; }
     body.result-page .logo { margin-bottom: 1.15rem; }
+    .voice-controls {
+      margin: -0.5rem 0 1rem;
+      text-align: left;
+    }
+    .voice-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      width: auto;
+      min-height: 44px;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #947b66;
+      background: #fffdf8;
+      color: #202a23;
+      font-size: 0.875rem;
+    }
+    .voice-button:hover:not(:disabled) { background: #f4ebd6; }
+    .voice-button[aria-pressed="true"] { border-color: #8b3326; color: #8b3326; }
+    .voice-button svg { width: 18px; height: 18px; }
+    #voice-status:not(:empty) {
+      margin-top: 0.35rem;
+      color: #514339;
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+    .follow-up {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #947b66;
+    }
+    .follow-up h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .follow-up iframe {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      margin: 1rem 0 0.55rem;
+      border: 0;
+      border-radius: 6px;
+      background: #202a23;
+    }
+    .follow-up a { color: #514339; font-size: 0.875rem; }
     .stop-it {
       font-size: clamp(5rem, 20vw, 6.4rem);
       font-weight: 900;
@@ -227,6 +293,77 @@ function getHTML(showResult, donationUrl) {
     const form = document.getElementById('form');
     const problem = document.getElementById('problem');
 
+    const voiceButton = document.getElementById('voice-button');
+    const voiceLabel = voiceButton.querySelector('span');
+    const voiceStatus = document.getElementById('voice-status');
+    const Recognition = window.SpeechRecognition;
+    const lang = document.documentElement.lang === 'en' ? 'en-US' : document.documentElement.lang;
+    const options = { langs: [lang], processLocally: true };
+    let recognition;
+
+    document.getElementById('voice-controls').hidden = false;
+    voiceButton.addEventListener('click', async () => {
+      if (recognition) {
+        if (voiceButton.getAttribute('aria-pressed') === 'true') recognition.stop();
+        return;
+      }
+
+      if (!Recognition?.available || !('processLocally' in Recognition.prototype)) {
+        voiceStatus.textContent = 'Private voice typing is unavailable in this browser. You can still type your problem.';
+        return;
+      }
+
+      voiceButton.disabled = true;
+      voiceStatus.textContent = 'Preparing private voice typing…';
+      try {
+        const availability = await Recognition.available(options);
+        if (availability !== 'available') {
+          if (!Recognition.install || availability === 'unavailable') {
+            voiceStatus.textContent = 'Private voice typing is unavailable for this language. You can still type your problem.';
+            return;
+          }
+          voiceStatus.textContent = 'Downloading the browser’s on-device language pack…';
+          if (!await Recognition.install(options)) throw new Error('Language pack unavailable');
+        }
+
+        const session = new Recognition();
+        session.lang = lang;
+        session.processLocally = true;
+        session.addEventListener('start', () => {
+          voiceButton.setAttribute('aria-pressed', 'true');
+          voiceLabel.textContent = 'Stop microphone';
+          voiceStatus.textContent = 'Listening…';
+          voiceButton.disabled = false;
+        });
+        session.addEventListener('result', (event) => {
+          const transcript = event.results[event.resultIndex][0].transcript.trim();
+          if (!transcript) return;
+          problem.value = (problem.value.trim() + ' ' + transcript).trim();
+          problem.setCustomValidity('');
+          voiceStatus.textContent = 'Voice input added. You can edit it before submitting.';
+        });
+        session.addEventListener('error', (event) => {
+          voiceStatus.textContent = event.error === 'not-allowed'
+            ? 'Microphone permission was denied. You can still type your problem.'
+            : 'Voice input could not be captured. Try again or type your problem.';
+        });
+        session.addEventListener('end', () => {
+          recognition = undefined;
+          voiceButton.setAttribute('aria-pressed', 'false');
+          voiceLabel.textContent = 'Use microphone';
+          voiceButton.disabled = false;
+          if (voiceStatus.textContent === 'Listening…') voiceStatus.textContent = 'Microphone stopped.';
+        });
+        recognition = session;
+        session.start();
+      } catch {
+        recognition = undefined;
+        voiceStatus.textContent = 'Private voice typing could not start. You can still type your problem.';
+      } finally {
+        if (!recognition) voiceButton.disabled = false;
+      }
+    });
+
     problem.addEventListener('input', () => problem.setCustomValidity(''));
     form.addEventListener('submit', (event) => {
       if (!problem.value.trim()) {
@@ -236,6 +373,7 @@ function getHTML(showResult, donationUrl) {
         return;
       }
 
+      recognition?.abort();
       form.reset();
     });
   </script>`}
