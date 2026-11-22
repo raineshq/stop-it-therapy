@@ -43,13 +43,14 @@ function getHTML(showResult, donationUrl) {
       <form id="form" action="/session/" method="get">
         <textarea id="problem" autocomplete="off" placeholder="Tell me about it..." required></textarea>
         <div class="voice-controls" id="voice-controls" hidden>
-          <button class="voice-button" id="voice-button" type="button" aria-pressed="false">
+          <button class="voice-button" id="voice-button" type="button" aria-pressed="false" aria-describedby="voice-privacy voice-status">
             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
               <rect x="9" y="2" width="6" height="13" rx="3"/>
               <path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3"/>
             </svg>
             <span>Use microphone</span>
           </button>
+          <p id="voice-privacy" hidden>Your browser may send microphone audio to its speech recognition provider.</p>
           <p id="voice-status" role="status"></p>
         </div>
         <button type="submit">Begin Free Session</button>
@@ -227,7 +228,7 @@ function getHTML(showResult, donationUrl) {
     .voice-button:hover:not(:disabled) { background: #f4ebd6; }
     .voice-button[aria-pressed="true"] { border-color: #8b3326; color: #8b3326; }
     .voice-button svg { width: 18px; height: 18px; }
-    #voice-status:not(:empty) {
+    #voice-privacy, #voice-status:not(:empty) {
       margin-top: 0.35rem;
       color: #514339;
       font-size: 0.875rem;
@@ -296,71 +297,80 @@ function getHTML(showResult, donationUrl) {
     const voiceButton = document.getElementById('voice-button');
     const voiceLabel = voiceButton.querySelector('span');
     const voiceStatus = document.getElementById('voice-status');
-    const Recognition = window.SpeechRecognition;
+    const voicePrivacy = document.getElementById('voice-privacy');
+    const Recognition = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     const lang = document.documentElement.lang === 'en' ? 'en-US' : document.documentElement.lang;
-    const options = { langs: [lang], processLocally: true };
     let recognition;
+    let localAvailable = false;
 
     document.getElementById('voice-controls').hidden = false;
-    voiceButton.addEventListener('click', async () => {
+    if (Recognition) {
+      voicePrivacy.hidden = false;
+      if (Recognition.available && 'processLocally' in Recognition.prototype) {
+        Recognition.available({ langs: [lang], processLocally: true }).then((availability) => {
+          localAvailable = availability === 'available';
+          voicePrivacy.hidden = localAvailable;
+        }).catch(() => {});
+      }
+    }
+
+    voiceButton.addEventListener('click', () => {
       if (recognition) {
-        if (voiceButton.getAttribute('aria-pressed') === 'true') recognition.stop();
+        recognition.stop();
+        return;
+      }
+      if (!Recognition) {
+        voiceStatus.textContent = 'Use the microphone on your device’s keyboard to dictate into the text box, if available.';
+        problem.focus();
         return;
       }
 
-      if (!Recognition?.available || !('processLocally' in Recognition.prototype)) {
-        voiceStatus.textContent = 'Private voice typing is unavailable in this browser. You can still type your problem.';
-        return;
-      }
+      const session = new Recognition();
+      session.lang = lang;
+      session.interimResults = true;
+      if (localAvailable) session.processLocally = true;
 
-      voiceButton.disabled = true;
-      voiceStatus.textContent = 'Preparing private voice typing…';
+      const original = problem.value;
+      let dictated = false;
+      const reset = () => {
+        recognition = undefined;
+        problem.readOnly = false;
+        voiceButton.setAttribute('aria-pressed', 'false');
+        voiceLabel.textContent = 'Use microphone';
+      };
+
+      session.addEventListener('start', () => {
+        voiceStatus.textContent = 'Listening…';
+      });
+      session.addEventListener('result', (event) => {
+        const transcript = Array.from(event.results, (item) => item[0].transcript.trim()).join(' ').trim();
+        if (!transcript) return;
+        dictated = true;
+        problem.value = [original.trimEnd(), transcript].filter(Boolean).join(' ');
+        problem.setCustomValidity('');
+      });
+      session.addEventListener('error', (event) => {
+        reset();
+        voiceStatus.textContent = ['not-allowed', 'service-not-allowed'].includes(event.error)
+          ? 'Allow microphone access in your browser, then try again.'
+          : 'Dictation could not continue. Try again or use your keyboard microphone.';
+      });
+      session.addEventListener('end', () => {
+        if (recognition !== session) return;
+        reset();
+        voiceStatus.textContent = dictated ? 'You can edit your text before submitting.' : 'No speech was captured. Try again.';
+      });
+
+      recognition = session;
+      problem.readOnly = true;
+      voiceButton.setAttribute('aria-pressed', 'true');
+      voiceLabel.textContent = 'Stop microphone';
+      voiceStatus.textContent = 'Starting microphone…';
       try {
-        const availability = await Recognition.available(options);
-        if (availability !== 'available') {
-          if (!Recognition.install || availability === 'unavailable') {
-            voiceStatus.textContent = 'Private voice typing is unavailable for this language. You can still type your problem.';
-            return;
-          }
-          voiceStatus.textContent = 'Downloading the browser’s on-device language pack…';
-          if (!await Recognition.install(options)) throw new Error('Language pack unavailable');
-        }
-
-        const session = new Recognition();
-        session.lang = lang;
-        session.processLocally = true;
-        session.addEventListener('start', () => {
-          voiceButton.setAttribute('aria-pressed', 'true');
-          voiceLabel.textContent = 'Stop microphone';
-          voiceStatus.textContent = 'Listening…';
-          voiceButton.disabled = false;
-        });
-        session.addEventListener('result', (event) => {
-          const transcript = event.results[event.resultIndex][0].transcript.trim();
-          if (!transcript) return;
-          problem.value = (problem.value.trim() + ' ' + transcript).trim();
-          problem.setCustomValidity('');
-          voiceStatus.textContent = 'Voice input added. You can edit it before submitting.';
-        });
-        session.addEventListener('error', (event) => {
-          voiceStatus.textContent = event.error === 'not-allowed'
-            ? 'Microphone permission was denied. You can still type your problem.'
-            : 'Voice input could not be captured. Try again or type your problem.';
-        });
-        session.addEventListener('end', () => {
-          recognition = undefined;
-          voiceButton.setAttribute('aria-pressed', 'false');
-          voiceLabel.textContent = 'Use microphone';
-          voiceButton.disabled = false;
-          if (voiceStatus.textContent === 'Listening…') voiceStatus.textContent = 'Microphone stopped.';
-        });
-        recognition = session;
         session.start();
       } catch {
-        recognition = undefined;
-        voiceStatus.textContent = 'Private voice typing could not start. You can still type your problem.';
-      } finally {
-        if (!recognition) voiceButton.disabled = false;
+        reset();
+        voiceStatus.textContent = 'The microphone could not start. Try your keyboard microphone instead.';
       }
     });
 
