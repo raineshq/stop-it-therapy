@@ -62,7 +62,7 @@ function getHTML(showResult, donationUrl) {
       ${giveButton}
     </div>
     <section class="follow-up" aria-labelledby="follow-up-heading">
-      <h3 id="follow-up-heading">If you are unsatisfied with your therapy session today, we suggest watching the following video may provide further support.</h3>
+      <h3 id="follow-up-heading">If you are unsatisfied with your therapy session today, we suggest watching the following video that may provide further support.</h3>
       <iframe
         title="Further support video"
         src="https://www.youtube-nocookie.com/embed/Ywc4q6qUvDk"
