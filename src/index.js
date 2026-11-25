@@ -59,6 +59,7 @@ function getHTML(showResult, donationUrl) {
   const result = `
     <div>
       <h2 class="stop-it">Stop it!</h2>
+      <p class="result-note">We have found this action solves 99.9% of the problems we hear our members have.</p>
       <p class="donation">If this session has been helpful, please give $5.</p>
       ${giveButton}
     </div>
@@ -258,6 +259,11 @@ function getHTML(showResult, donationUrl) {
       font-size: clamp(5rem, 20vw, 6.4rem);
       font-weight: 900;
       letter-spacing: -1px;
+    }
+    .result-note {
+      margin: 0.5rem auto 1rem;
+      max-width: 36ch;
+      line-height: 1.5;
     }
     .donation {
       font-size: 0.875rem;
